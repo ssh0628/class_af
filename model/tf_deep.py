@@ -290,7 +290,7 @@ def kfold(data, labels, groups, k=3, batch_size=64, num_classes=2, model_path=No
         save_path = os.path.join(plot_dir, f'fold_{fold}_training_plot.png')
         plt.tight_layout()
         plt.savefig(save_path)
-        plt.show()
+        # plt.show()
        
     """ print("Average: ")
     avg_score = np.mean(all_scores, axis=0)
