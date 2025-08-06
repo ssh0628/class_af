@@ -5,11 +5,17 @@ import os, sys, io, re
 from keras.models import load_model, Model
 from keras.layers import Dense
 from keras.losses import Loss
-# rom sklearn.model_selection import KFold
+# from sklearn.model_selection import KFold
 from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.metrics import f1_score
 from keras.optimizers import Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint
+
+# 현재 파일(__file__)이 있는 폴더 경로
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# 그 상위 폴더 경로
+parent_dir = os.path.dirname(current_dir)
 
 """ import argparse
 
@@ -244,13 +250,18 @@ def kfold(data, labels, groups, k=3, batch_size=64, num_classes=2, model_path=No
     if best_model:
         # save_path = rf"C:\Users\cream\OneDrive\Desktop\neuro\model\best_model_f1_fold{best_fold}.keras"
         save_path = model_path
-        best_model.save(save_path)
+        save_path = model_path.replace('.h5', '.keras')
+        # best_model.save(save_path)
         # print(f"\n[Save] Best model saved as: {save_path}")
         yield f"\n[Save] Best model saved as: {save_path}\n"
 
     avg_f1 = np.mean(all_scores)
     # print(f"\n[Summary] Average F1-score: {avg_f1:.4f}")
     yield f"\n[Summary] Average F1-score: {avg_f1:.4f}\n"
+    
+    plot_dir = os.path.join(parent_dir, 'plots')
+    # 폴더 없으면 만들기
+    os.makedirs(plot_dir, exist_ok=True)
     
     for hist in all_fold_histories:
         fold = hist['fold']
@@ -275,10 +286,10 @@ def kfold(data, labels, groups, k=3, batch_size=64, num_classes=2, model_path=No
         plt.xlabel('Epoch')
         plt.ylabel('Accuracy')
         plt.legend()
-
-        save_path = os.path.join(model_path, f'fold_{fold}_training_plot.png')
-        plt.savefig(save_path)
+        
+        save_path = os.path.join(plot_dir, f'fold_{fold}_training_plot.png')
         plt.tight_layout()
+        plt.savefig(save_path)
         plt.show()
        
     """ print("Average: ")
