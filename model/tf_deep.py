@@ -276,6 +276,8 @@ def kfold(data, labels, groups, k=3, batch_size=64, num_classes=2, model_path=No
         plt.ylabel('Accuracy')
         plt.legend()
 
+        save_path = os.path.join(model_path, f'fold_{fold}_training_plot.png')
+        plt.savefig(save_path)
         plt.tight_layout()
         plt.show()
        
