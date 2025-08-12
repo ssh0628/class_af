@@ -1,5 +1,5 @@
-Flask==3.1.1
-tensorflow==2.19.0
+Flask
+tensorflow
 numpy
 pandasmatplotlib
 scikit-learn
