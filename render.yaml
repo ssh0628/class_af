@@ -3,4 +3,5 @@ services:
     env: python
     pythonVersion: "3.10.18"
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn server.server:app
+    startCommand: gunicorn server.server:app --bind 0.0.0.0:$PORT
+
