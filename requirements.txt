@@ -1,7 +1,8 @@
 Flask
 tensorflow
 numpy
-pandasmatplotlib
+pandas
+matplotlib
 scikit-learn
 scipy
 os
