@@ -1,4 +1,4 @@
-import sys, os, time, threading, io, shutil, subprocess, queue
+import sys, os, time, shutil
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
     
 from flask import Flask, Flask, render_template, request, Response, stream_with_context
@@ -26,9 +26,6 @@ def train_model_generator():
     time.sleep(0.01)
     
     original_stdout = sys.stdout
-
-    # 표준 출력 캡처
-    # buffer = io.StringIO()
     
     try:
         data_dir = SAVE_FOLDER
@@ -65,19 +62,19 @@ def upload():
     if not uploaded_files or uploaded_files[0].filename == '':
         return "No files uploaded", 400
     
-    # 업로드 폴더 비우기
+    # Clear upload folder
     if os.path.exists(UPLOAD_FOLDER):
         shutil.rmtree(UPLOAD_FOLDER)
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     
-    # 파일 저장
+    # Save files
     for file in uploaded_files:
         filename = file.filename
         save_path = os.path.join(UPLOAD_FOLDER, filename)
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         file.save(save_path)
         
-    # 전처리 실행
+    # Preprocessing
     try:
         ppg_signal(UPLOAD_FOLDER, SAVE_FOLDER)
         return render_template("home.html", message="Preprocessing complete")
@@ -90,4 +87,4 @@ def train():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

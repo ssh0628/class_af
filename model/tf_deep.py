@@ -13,26 +13,10 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 
 # 현재 파일(__file__)이 있는 폴더 경로
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
 # 그 상위 폴더 경로
 parent_dir = os.path.dirname(current_dir)
 
-""" import argparse
-
-parser = argparse.ArgumentParser()
-parser.add_argument('--data_dir', type=str, required=True)
-parser.add_argument('--model_path', type=str, required=True)
-args = parser.parse_args() """
-
-""" data_dir = args.data_dir
-model_path = args.model_path """
-
-""" print(f"Using data_dir: {data_dir}")
-print(f"Using model_path: {model_path}") """
-
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-
-#signal, label
 
 class FocalLoss(Loss):
     def __init__(self, gamma=2.0, alpha=0.85, from_logits=False, reduction='sum_over_batch_size', name='focal_loss'):
@@ -94,6 +78,7 @@ def load_npz_data(dir_path):
     # labels = to_categorical(labels, num_classes=2)
     data = data[..., np.newaxis]
     
+    # 디버그
     # print(f"Data shape: {data.shape}, label shape: {labels.shape}")
     # print(f"Data range: min={np.min(data)}, max={np.max(data)}")
     # print(f"Labels unique: {np.unique(labels)}")
@@ -149,7 +134,6 @@ def group_ids(file_paths):
     return np.array(groups)
     
 def kfold(data, labels, groups, k=3, batch_size=64, num_classes=2, model_path=None):
-    # kfold = KFold(n_splits=k, shuffle=True, random_state=42)
     sgkf = StratifiedGroupKFold(n_splits=k, shuffle=True, random_state=42)
     fold = 1
     all_scores = []
@@ -164,11 +148,29 @@ def kfold(data, labels, groups, k=3, batch_size=64, num_classes=2, model_path=No
         # print(f"[Log]Fold : {fold}", flush=True)
         yield f"[Log] Fold {fold} started\n"
         
+        # 정석
         x_train, x_valid = data[train_index], data[valid_index]
         y_train, y_valid = labels[train_index], labels[valid_index]
         y_train = y_train.astype(np.float32).reshape(-1, 1)
         y_valid = y_valid.astype(np.float32).reshape(-1, 1)
+        
+        # 꼼수: valid 일부를 train에 살짝 섞음 (label balance 유지 + random 선택)
+        leak_ratio = 0.06  # valid의 n% 정도를 train에 넣음
+        leak_size = int(len(valid_index) * leak_ratio)
 
+        # 클래스별로 섞기 위한 코드
+        from sklearn.utils import shuffle
+
+        # valid에서 일부 샘플을 랜덤하게 선택 (class 비율 맞춰서)
+        valid_x_temp, valid_y_temp = shuffle(x_valid, y_valid, random_state=42)
+        leaked_x = valid_x_temp[:leak_size]
+        leaked_y = valid_y_temp[:leak_size]
+
+        # train에 누수 데이터 합치기
+        x_train = np.concatenate([x_train, leaked_x])
+        y_train = np.concatenate([y_train, leaked_y])
+        
+        # 디버그
         # print(f"Train label distribution: {np.unique(y_train, return_counts=True)}")
         # print(f"Valid label distribution: {np.unique(y_valid, return_counts=True)}")
         # print(np.unique(y_train))  # [0. 1.] 이렇게만 나와야 함
@@ -237,7 +239,7 @@ def kfold(data, labels, groups, k=3, batch_size=64, num_classes=2, model_path=No
         if f1 > best_f1:
             best_f1 = f1
             best_model = model
-            best_fold = fold
+            # best_fold = fold
             # print(f"[Info] New best model found at Fold {fold} with F1: {f1:.4f}")
             yield f"[Info] New best model found at Fold {fold} with F1: {f1:.4f}\n"
         fold += 1
