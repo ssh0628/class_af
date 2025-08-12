@@ -1,0 +1,12 @@
+Flask==3.1.1
+tensorflow==2.19.0
+numpy
+pandasmatplotlib
+scikit-learn
+scipy
+os
+sys
+io
+re
+time
+shutil
