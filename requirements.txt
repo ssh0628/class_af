@@ -5,8 +5,4 @@ pandas
 matplotlib
 scikit-learn
 scipy
-sys
-io
-re
-time
-shutil
+gunicorn
