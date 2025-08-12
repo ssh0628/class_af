@@ -1,0 +1,6 @@
+services:
+  - type: web
+    env: python
+    pythonVersion: "3.10"
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn server.server:app
